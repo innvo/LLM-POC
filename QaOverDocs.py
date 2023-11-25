@@ -16,7 +16,7 @@ loader = TextLoader('state_of_the_union.txt')
 from langchain.indexes import VectorstoreIndexCreator
 index = VectorstoreIndexCreator().from_loaders([loader])
 
-query = "What did the president say about Micheal Jackson"
+query = "What did the president say about the Justices"
 
 # Convert dictionary to string
 response =  json.dumps(index.query_with_sources(query))

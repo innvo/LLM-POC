@@ -1,0 +1,2 @@
+chromadb
+prompt_engineering
