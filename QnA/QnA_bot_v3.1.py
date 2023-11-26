@@ -49,7 +49,7 @@ def process_pdf_document(full_path):
     # Create embeddings
     embedding_vectors = create_embeddings_gpt3(chunks)
     # Write to PG vectorstore
-    write_to_pg_vectorstore(embedding_vectors)
+    # write_to_pg_vectorstore(embedding_vectors)
 
 ## Process docx document
 def process_docx_document(full_path):
@@ -72,8 +72,9 @@ def chunk_text(text):
     texts = text_splitter.create_documents([text])
     print("Number of records in texts: " + str(len(texts)))
     for i, text in enumerate(texts):
-        print("chunk number: " + str(i) + " chunk string: " +  str(texts[i].page_content))
-        chunks.append(texts[i].page_content)
+        chunk_string = str(texts[i].page_content)
+        print("chunk number: " + str(i) + " chunk string: " +  chunk_string)
+        chunks.append(chunk_string)
     return chunks
 
 # def chunk_text(text, chunk_size, overlap):
@@ -110,8 +111,6 @@ def cleanse_pdf(pdf):
     # pdf = pdf.replace('\n', '')
     return pdf
 
-
-
 ## Cleanse text
 def cleanse_text(text):
     # Remove HTML tags
@@ -131,29 +130,42 @@ def cleanse_text(text):
 ## Create embeddings
 def create_embeddings_gpt3(chunks):
     embeddings = OpenAIEmbeddings() # Load the Langchain OpenAI client
-    embedding_vectors = []
-    for i, chunk in enumerate(chunks):      
-        if chunk[i] != ' ': # Skip empty chunks.  THIS SHOULD BE FIXED in Chunks
-            # print("chunk number: " + str(i) + " chunk string: " +  chunk[i])
-            # Create embeddings
-            vectors = embeddings.embed_query(chunk[i])
-            # print("query_result: " + str(vectors))
-            # Create a tuple of chunk and corresponding embedding vectors
-            chunk_and_vectors = (chunk[i], vectors)
-            # Append the tuple to the embedding_vectors array
-            embedding_vectors.append(chunk_and_vectors)
-    return embedding_vectors
-
-def write_to_pg_vectorstore(embedding_vectors):
-    conn = psycopg2.connect("dbname=postgres user=postgres password=postgres host=tp-dev.cr7ro0ecjzwg.us-east-1.rds.amazonaws.com port=5432")
+    conn = psycopg2.connect("dbname=llm-demo user=postgres password=postgres host=tp-dev.cr7ro0ecjzwg.us-east-1.rds.amazonaws.com port=5432")
+   
     # Open a cursor to perform database operations
     cur = conn.cursor()
 
-    for i, (chunk, vector) in enumerate(embedding_vectors):
-        # Execute a query
-        cur.execute("INSERT INTO QnA_bot_vectorstore (id, chunk, vector) VALUES (%s, %s, %s)", (i, chunk, vector))
-    # Commit changes
+    embedding_vectors = []
+    for i, chunk in enumerate(chunks):      
+        if chunks[i] != ' ': # Skip empty chunks.  THIS SHOULD BE FIXED in Chunks
+            embedding_content = str(chunks[i])
+            embedding_vector = embeddings.embed_query(chunks[i])
+            # print("chunk number: " + str(i) + " chunk stringXXX: " +  embedding_content)
+            cur.execute("INSERT INTO contentembedding (embedding_content, embedding_vector) VALUES ( %s, %s)", (embedding_content, embedding_vector))
+    
+            # Create embeddings
+           
+            # print("vector: " + str(vectors))
+            # Create a tuple of chunk and corresponding embedding vectors
+            chunks_vectors = (chunks[i])
+            # Append the tuple to the embedding_vectors array
+            embedding_vectors.append(chunks_vectors)
+        # Commit changes
     conn.commit()
+
+    return embedding_vectors
+
+def write_to_pg_vectorstore(embedding_vectors):
+    conn = psycopg2.connect("dbname=llm-demo user=postgres password=postgres host=tp-dev.cr7ro0ecjzwg.us-east-1.rds.amazonaws.com port=5432")
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
+
+    for i, (embedding_vectors) in enumerate(embedding_vectors):
+        # Execute a query
+         print("chunk number: " + str(i) + " chunk stringYYY: " +  embedding_vectors[i])
+         #  cur.execute("INSERT INTO contentembedding (embedding_content) VALUES ( %s)", (chunks[i]))
+    # Commit changes
+    # conn.commit()
 
 
     # Close cursor and connection
