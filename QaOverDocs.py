@@ -20,6 +20,7 @@ query =  "What did the president say about Justice Breyer"
 
 # Convert dictionary to string
 response =  json.dumps(index.query_with_sources(query))
+
 # Convert string to json
 data = json.loads(response)
 

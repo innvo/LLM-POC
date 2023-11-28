@@ -9,6 +9,7 @@ from langchain.llms import OpenAI
 from langchain.vectorstores import Pinecone
 import langchain
 import json
+import pandas as pd
 import pinecone
 import openai
 import os
@@ -25,8 +26,45 @@ index = pinecone.Index(index_name=index_name)
 
 # Langchain setup
 model = langchain.OpenAI(temperature=0, model_name="gpt-3.5-turbo")
-# qa_prompt = "Human: how many jobs were created?\nAssistant:" ##not using context
 
+
+def get_documents(response):
+
+    ids = []
+    scores = [] 
+    contents = []
+    docs= []
+    
+    for match in response['matches']:
+        #ids.append(match['metadata']['embedding_id'])
+        #scores.append(match['score'])
+        #contents.append(match['metadata']['embedding_content'])
+        content=match['metadata']['embedding_content']
+  
+         # Create Document object
+        doc = Document(
+            page_content=content
+        )
+        docs.append(doc)
+
+
+
+    df = pd.DataFrame({
+        #'id': ids,
+        #'score': scores,
+        'page_content': contents
+    })
+
+    #docs = df.to_dict(orient='records') 
+    print(docs)
+
+    qa_chain = load_qa_chain(model, chain_type="stuff")
+    response = qa_chain.run(
+        question=question, 
+        input_documents=docs
+    )  
+    print(response)
+    return df
 
 # Generate the query embedding
 def answer_question(question):
@@ -34,24 +72,28 @@ def answer_question(question):
     question_emb = embeddings.embed_query(question)
 
     # Perform the query
-    res = index.query([question_emb], top_k=1, include_metadata=True, include_values=False)
-    print(res)
+    response = index.query([question_emb], top_k=3, include_metadata=True, include_values=False)
 
-    #print(res)
-    context = res['matches'][0]['metadata']['embedding_content']
-    prompt = f"Human: {question}\nAssistant: Based on the following context: {context}\n"
+    get_documents(response)
+  
 
-    # response = model.generate(prompt)
-    print(prompt)
+    
+    # Get response for each prompt
+        # X = res['matches'][1]['metadata']['embedding_content']
+        # print(X)
+        # prompt = f"Human: {question}\nAssistant: Based on the following context: {context}\n"
 
-     # Get response for each prompt
-    responses = model.generate(
-        [prompt]
-    )
+    # # response = model.generate(prompt)
+    # print(prompt)
+
+    #  # Get response for each prompt
+    # responses = model.generate(
+    #     [prompt]
+    # )
 
     # Return response list
-    return responses
+   #  return responses
 
 question =  "What did the president say about Justice Breyer" 
 answer = answer_question(question)
-print(answer)
+#print(answer)
