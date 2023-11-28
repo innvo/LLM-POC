@@ -58,6 +58,21 @@ def process_docx_document(full_path):
     # Create embeddings
     create_embeddings_gpt3(chunks)
 
+
+## Process text document
+def process_txt_document(full_path):
+    print("process_txt_document: " + full_path)
+    # Extract text
+    with open(full_path, 'r') as file:
+        text = file.read()
+    # Cleanse text
+    text = cleanse_text(text)
+    print("text: " + text)
+    # Create chunks
+    chunks = chunk_text(text)
+    # Create embeddings
+    create_embeddings_gpt3(chunks)
+
 ## Chunk text
 def chunk_text(text):
     print("chunk_text")
@@ -125,5 +140,8 @@ for file in files:
         full_path = os.path.join(folder_path, file)
         print(" In docx: " + full_path)
         process_docx_document(full_path)
-    
+    elif file.endswith('.txt'):
+        full_path = os.path.join(folder_path, file)
+        print(" In txt: " + full_path)
+        process_txt_document(full_path)
       

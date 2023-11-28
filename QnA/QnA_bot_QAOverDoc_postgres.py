@@ -1,12 +1,14 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import OpenAI
 import os
 import psycopg2
 
 # Clear the terminal
 os.system('cls' if os.name == 'nt' else 'clear')
 
-OPENAI_API_KEY='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'
 embeddings = OpenAIEmbeddings()
+OPENAI_API_KEY='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'
 
 ## search emebedding
 def search_embedding(query_string):
@@ -35,10 +37,16 @@ def similarity_search(query_string):
     # Close cursor and connection
     cur.close()
     conn.close()
+    return results
   
 ###############################
-query_string =  "What did the president say about Justice Breyer" 
-similarity_search(query_string)
+query_string = "What did the president say about Ketanji Brown Jackson"
+results = similarity_search(query_string)
+print(results)
+
+# Quickstart
+chain = load_qa_chain(OpenAI(temperature=50), chain_type="stuff")
+#chain.run(input_documents=results, question=query_string)
 
 
 ## No Match

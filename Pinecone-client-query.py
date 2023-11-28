@@ -21,11 +21,12 @@ pinecone.init(api_key="ef9a9434-5233-4b29-a794-355b106be8d7",
               environment="us-west4-gcp-free")
 
 embeddings = OpenAIEmbeddings()
-index_name = "langchain-demo"
+index_name = "llm-demo"
 docsearch = Pinecone.from_existing_index(index_name, embeddings)
 
-query = "What did the president say about Ketanji Brown Jackson"
-# docs = docsearch.similarity_search(query)
+#query = "What did the president say about Ketanji Brown Jackson"
+query = "what types of abuses do you see"
+docs = docsearch.similarity_search(query)
 
 
 # print(docs[0].page_content)
@@ -59,8 +60,8 @@ def print_docs_with_metadata(docs):
     print("Doc title:", doc["title"])
     print("Doc url:", doc["url"])
     print("Doc score:", doc["score"])
-    doc["metadata"] = get_metadata(doc["url"])
-  print("Doc metadata:", doc["metadata"])
+  #   doc["metadata"] = get_metadata(doc["url"])
+  # print("Doc metadata:", doc["metadata"])
 
 docs = docsearch.similarity_search(query)
 print_docs_with_metadata(docs)

@@ -20,17 +20,15 @@ index_name = "llm-demo"
 index = pinecone.Index(index_name=index_name)
 
 ## No Match
-#query_string = "What did the president say about Justice Breyer" 
+query_string = "What did the president say about Justice Breyer" 
 ## Exact Match
 # query_string ="abductions and physical abuse by nonstate armed groups serious restrictions on freedom of expression including violence threats of violence or unjustified detentions of journalists and censorship substantial interference with the right of peaceful assembly and freedom of association serious restrictions on freedom of movement inability of citizens to change their government peacefully through free and fair elections serious and unreasonable restrictions on political participation serious"
 # Partial Match
 # query_string ="what is the ruling political party in Cameroon"
-query_string ="what types of abuses do you see"
+# query_string ="Who is Paul Biya"
+
 # Generate the query embedding
 query_embedding = embeddings.embed_query(query_string)
-# print(len(query_embedding)) # Should be 1536, the dimensionality of OpenAI embeddings
-#print(query_embedding)
-
 
 # Perform the query
 search_results = index.query(query_embedding, top_k=3, include_metadata=True, include_values=False)

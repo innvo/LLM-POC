@@ -7,6 +7,11 @@ from langchain.indexes.vectorstore import VectorstoreIndexCreator
 import json
 import os
 
+OPENAI_API_KEY='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'
+
+os.system("clear")
+print("============")
+
 with open("state_of_the_union.txt") as f:
     state_of_the_union = f.read()
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -30,6 +35,8 @@ chain.run(input_documents=docs, question=query)
 chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff")
 response = json.dumps(chain({"input_documents": docs, "question": query}, return_only_outputs=True))
 
+print(str(docs))
+
 # Custom Prompt
 prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
@@ -44,11 +51,6 @@ chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
 chain({"input_documents": docs, "question": query}, return_only_outputs=True)
 
 
-
-
-
-os.system("clear")
-print("============")
 print(response)
 
 # Print Values
