@@ -1,7 +1,6 @@
 # https://python.langchain.com/en/latest/modules/indexes/vectorstores/examples/pinecone.html
 #https://blog.bytebytego.com/p/how-to-build-a-smart-chatbot-in-10
 
-# export OPENAI_API_KEY=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
 
 import getpass
 from langchain import OpenAI

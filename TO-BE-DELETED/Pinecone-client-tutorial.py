@@ -1,5 +1,4 @@
 # https://python.langchain.com/en/latest/modules/indexes/vectorstores/examples/pinecone.html
-# export OPENAI_API_KEY=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
 
 import getpass
 from langchain import OpenAI
