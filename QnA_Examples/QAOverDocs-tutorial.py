@@ -3,9 +3,8 @@ from langchain.document_loaders import TextLoader
 import openai
 import os
 
-#export OPENAI_API_KEY='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'
-openai.api_key = os.getenv("OPENAI_API_KEY")
-print(openai.api_key)
+# Set local environment variables
+OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
 
 # # Load  document
 loader = TextLoader('state_of_the_union.txt')

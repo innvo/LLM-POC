@@ -1,11 +1,20 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import OpenAI
 import os
 import psycopg2
 
 # Clear the terminal
 os.system('cls' if os.name == 'nt' else 'clear')
 
-OPENAI_API_KEY='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'
+embeddings = OpenAIEmbeddings()
+## Set local environment variables
+folder_path = "QnA/country_reports/content"
+OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
+db_user=os.getenv("DBUSER")
+db_password=os.getenv("DBPASSWORD")
+db_host=os.getenv("DBHOST")
+
 embeddings = OpenAIEmbeddings()
 
 ## search emebedding
@@ -19,8 +28,13 @@ def similarity_search(query_string):
     print("in similarity_search")
     query_embedding = search_embedding(query_string)
     # print("query_embedding: " + str(query_embedding))
-    conn = psycopg2.connect("dbname=llm-demo user=postgres password=postgres host=tp-dev.cr7ro0ecjzwg.us-east-1.rds.amazonaws.com port=5432")
-   
+    conn = psycopg2.connect(
+        dbname="llm-demo",
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        port="5432"
+        )
     # Open a cursor to perform database operations
     cur = conn.cursor()
     # Execute aquery
@@ -35,15 +49,11 @@ def similarity_search(query_string):
     # Close cursor and connection
     cur.close()
     conn.close()
+    return results
   
 ###############################
-query_string =  "What did the president say about Justice Breyer" 
-similarity_search(query_string)
+query_string = "What did the president say about Ketanji Brown Jackson"
+results = similarity_search(query_string)
+print(results)
 
-
-## No Match
-#query_string = "What did the president say about Justice Breyer" 
-## Exact Match
-# query_string ="to exploitative working conditions such as working excessive hours or having their wages withheld mainly in domestic labor page 26"
-# query_string ="what types of abuses do you see"
-
+# Quickstart

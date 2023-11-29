@@ -12,10 +12,12 @@ import os
 os.system('cls' if os.name == 'nt' else 'clear')
 
 ## Set local environment variables
-embeddings = OpenAIEmbeddings()
-pinecone.init(api_key="ef9a9434-5233-4b29-a794-355b106be8d7",
-              environment="us-west4-gcp-free")
+OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
+pinecone.init(api_key=os.getenv("PINECONE_API_KEY"),
+              environment=os.getenv("PINECONE_ENVIRONMENT_KEY"))
 index_name = "llm-demo"
+
+embeddings = OpenAIEmbeddings()
 
 # Create a Pinecone index object
 index = pinecone.Index(index_name=index_name)

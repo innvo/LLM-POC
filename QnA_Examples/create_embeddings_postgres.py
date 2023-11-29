@@ -10,25 +10,26 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import PGEmbedding
 import pdfminer.high_level
-import pinecone
 import psycopg2
 
 # Clear the terminal
 os.system('cls' if os.name == 'nt' else 'clear')
 
 ## Set local environment variables
-folder_path = "QnA/country_reports/content"
-pinecone.init(api_key="ef9a9434-5233-4b29-a794-355b106be8d7",
-              environment="us-west4-gcp-free")
-index_name = "llm-demo"
+folder_path = "QnA_Examples/content"
+OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
+db_user=os.getenv("DBUSER")
+db_password=os.getenv("DBPASSWORD")
+db_host=os.getenv("DBHOST")
 
-OPENAI_API_KEY='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'
+embeddings = OpenAIEmbeddings()
+
+## Set text splitter
 text_splitter = RecursiveCharacterTextSplitter(
     # Set a really small chunk size, just to show.
     chunk_size = 500,
     chunk_overlap  = 50
 )
-
 embedding = OpenAIEmbeddings(request_timeout=60)
 # embeddingmodel="text-embedding-ada-002"
 files = os.listdir(folder_path)
@@ -48,7 +49,7 @@ def process_pdf_document(full_path):
     # Create chunks
     chunks = chunk_text(text)
     # Create embeddings
-    create_embeddings_gpt3(chunks)
+    create_embeddings(chunks)
 
 ## Process docx document
 def process_docx_document(full_path):
@@ -62,7 +63,8 @@ def process_docx_document(full_path):
     # Create chunks
     chunks = chunk_text(text)
     # Create embeddings
-    create_embeddings_gpt3(chunks)
+    create_embeddings(chunks)
+
 
 ## Process text document
 def process_txt_document(full_path):
@@ -72,12 +74,12 @@ def process_txt_document(full_path):
         text = file.read()
     # Cleanse text
     text = cleanse_text(text)
-    print("text: " + text)
+    #print("text: " + text)
     # Create chunks
     chunks = chunk_text(text)
     # Create embeddings
-    create_embeddings_gpt3(chunks)
-    
+    create_embeddings(chunks)
+
 ## Chunk text
 def chunk_text(text):
     print("chunk_text")
@@ -89,20 +91,6 @@ def chunk_text(text):
         #print("chunk number: " + str(i) + " chunk string: " +  chunk_string)
         chunks.append(chunk_string)
     return chunks
-
-## Process text document
-def process_txt_document(full_path):
-    print("process_txt_document: " + full_path)
-    # Extract text
-    with open(full_path, 'r') as file:
-        text = file.read()
-    # Cleanse text
-    text = cleanse_text(text)
-    print("text: " + text)
-    # Create chunks
-    chunks = chunk_text(text)
-    # Create embeddings
-    create_embeddings_gpt3(chunks)
 
 ## Cleanse text
 def cleanse_text(text):
@@ -122,34 +110,36 @@ def cleanse_text(text):
     return text
 
 ## Create embeddings
-def create_embeddings_gpt3(chunks):
-    embeddings = OpenAIEmbeddings() # Load the Langchain OpenAI client
-    index = pinecone.Index("llm-demo")
+def create_embeddings(chunks):
+    # Connect to the PostgreSQL database server
+    conn = psycopg2.connect(
+        dbname="llm-demo",
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        port="5432"
+        )
+   
+    # Truncate the coneptembedding table
+    cur = conn.cursor()
+    cur.execute("TRUNCATE TABLE contentembedding")
+    conn.commit()
 
-    # metadata = { 
-    #             'file': 'OnePage.docx' 
-    # }
-    # res = embeddings.embed_documents(chunks)
-    # print(len(res), len(res[0]))
-
-    #print(isinstance(chunks, list))
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
 
     embedding_vectors = []
     for i, chunk in enumerate(chunks):      
         if chunks[i] != ' ': # Skip empty chunks
-            embedding_id = str(i)
             embedding_content = str(chunks[i])
             embedding_vector = embeddings.embed_query(chunks[i])
-            metadata = {
-                "embedding_content": embedding_content,  # Add the chunk to the metadata
-                "embedding_id": embedding_id  # Add the id to the metadata
-            }
-            embedding_vectors.append({
-                "id": embedding_id,
-                "values": embedding_vector,
-                "metadata": metadata
-            })
-    index.upsert(embedding_vectors)
+            cur.execute("INSERT INTO contentembedding (embedding_content, embedding_vector) VALUES ( %s, %s)", (embedding_content, embedding_vector))
+   
+    # Commit changes
+    conn.commit()
+    # Close cursor and connection
+    cur.close()
+    conn.close()
 
 ## Process all files in the folder
 for file in files:
@@ -166,6 +156,4 @@ for file in files:
         full_path = os.path.join(folder_path, file)
         print(" In txt: " + full_path)
         process_txt_document(full_path)
-      
-    
       

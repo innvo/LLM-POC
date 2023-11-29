@@ -17,8 +17,10 @@ import requests
 import json
 
 
-pinecone.init(api_key="ef9a9434-5233-4b29-a794-355b106be8d7",
-              environment="us-west4-gcp-free")
+OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
+pinecone.init(api_key=os.getenv("PINECONE_API_KEY"),
+              environment=os.getenv("PINECONE_ENVIRONMENT_KEY"))
+
 
 embeddings = OpenAIEmbeddings()
 index_name = "llm-demo"
