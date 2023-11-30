@@ -18,7 +18,7 @@ embeddings = np.stack(person_df['embedding'].values)
 index.add(embeddings) 
 
 # Query  
-query_name = "John Doe"
+query_name = "John Salome"
 query_words = query_name.split()
 
 # Initialize lists to store overall indices and distances
