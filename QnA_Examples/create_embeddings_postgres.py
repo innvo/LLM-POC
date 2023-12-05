@@ -122,7 +122,6 @@ def create_embeddings(chunks):
    
     # Truncate the coneptembedding table
     cur = conn.cursor()
-    cur.execute("TRUNCATE TABLE contentembedding")
     conn.commit()
 
     # Open a cursor to perform database operations

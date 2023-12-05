@@ -7,7 +7,8 @@ import os
 OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
 
 # # Load  document
-loader = TextLoader('state_of_the_union.txt')
+loader = TextLoader("QnA_Examples/state_of_the_union.txt")
+
 
 # Create Index
 # Requires chromadb 
