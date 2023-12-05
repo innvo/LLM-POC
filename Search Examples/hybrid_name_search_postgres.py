@@ -24,7 +24,8 @@ def generate_query(name):
     # Generate the SQL query
     query = "SELECT id, name FROM name_table WHERE "
     #query += " OR ".join([f"SOUNDEX(name) LIKE CONCAT(SOUNDEX('{token}'),' %')" for token in tokens])
-    query += " OR ".join([f"name % '{token}'" for token in tokens])
+    query += " OR ".join([f"name % '{token}'" for token in tokens]
+    )
 
     return query
 
@@ -112,7 +113,7 @@ def execute_sql(ids):
     cur = conn.cursor()
 
     # Generate the SQL query
-    query = "SELECT * FROM name_table WHERE id IN %s"
+    query = "SELECT * FROM name_table WHERE id IN %s "
     cur.execute(query, (tuple(ids),))
 
     # Fetch all the rows
