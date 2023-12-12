@@ -30,3 +30,16 @@ similarity_df = pd.DataFrame(similarity_matrix, columns=addresses, index=address
 print(cluster_df)
 print() 
 print(similarity_df.round(3))
+
+
+# Reset the index of the similarity DataFrame
+similarity_df_reset = similarity_df.reset_index()
+
+# Reshape the DataFrame
+similarity_df_melt = similarity_df_reset.melt(id_vars='index', var_name='address2', value_name='similarity_score')
+
+# Rename the columns
+similarity_df_melt.columns = ['address1', 'address2', 'similarity_score']
+
+# Print the DataFrame
+print(similarity_df_melt)
