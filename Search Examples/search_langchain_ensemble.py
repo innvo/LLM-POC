@@ -23,7 +23,6 @@ score_threshold = 0.8
 search_query = "I like computers by Macbooks"
 key_word = "computer"
 
-
 # Get the version of langchain
 langchain_version = pkg_resources.get_distribution("langchain").version
 chroma_version = pkg_resources.get_distribution("chroma").version
@@ -95,10 +94,27 @@ for idx, (doc, score) in enumerate(SIMILARITY_results):
         SIMILARITY_relevant_documents.append((idx,doc.page_content,doc.metadata, score))
 
 # Print the results
-if level == 'INFOZ':
+if level == 'INFO':
     for doc in SIMILARITY_relevant_documents:
         score = doc[3]
         similarity_score = round(1 - score, 2)
         print(f"Document: {doc}, Similarity Score: {similarity_score}")
 else:
     print("No relevant documents found.")
+
+
+# Create ensemble result
+ensemble_result = []
+
+# Get documents from SIMILARITY_results where the content_id matches the content_id from BM25_results
+for doc_bm25 in BM25_relevant_documents:
+    x = doc_bm25[2]['content_id']
+    #print("x", x)
+    for (doc_similarity,score) in SIMILARITY_results:
+        y = doc_similarity.metadata['content_id']
+        #print ("y", y)
+        if x == y:
+            print("Match")
+            ensemble_result.append((doc_similarity,1-score))
+    
+print("Ensemble Result: ", ensemble_result)
