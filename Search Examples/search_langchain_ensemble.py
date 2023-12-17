@@ -9,14 +9,20 @@ import logging
 import os
 import pkg_resources
 
-
 # Configure the logging module to output diagnostic information
 # logging.basicConfig(level=logging.INFO)
-# 
-level = 'INFO'
+
+level = 'INFOZ'
 
 # Clear the terminal
 os.system('cls' if os.name == 'nt' else 'clear')
+
+#Set Search and Key Words
+k=10
+score_threshold = 0.8
+search_query = "I like computers by Macbooks"
+key_word = "computer"
+
 
 # Get the version of langchain
 langchain_version = pkg_resources.get_distribution("langchain").version
@@ -24,7 +30,7 @@ chroma_version = pkg_resources.get_distribution("chroma").version
 # faiss_version = pkg_resources.get_distribution("faiss").version
 
 # # Print the version
-if level == 'INFO':
+if level == 'INFOX':
     print("langchain_version", langchain_version)
     print("chroma_version", chroma_version)                      
 
@@ -42,16 +48,9 @@ doc_list = [
     Document(page_content =  "I love fruit juice",  metadata = {"title": "Juice","content_id": 5}),
 ]
 
-# Extract the text from each document
-#doc_texts = [doc["text"] for doc in doc_list]
-
 #Build the BM25Retriever
 bm25_retriever = BM25Retriever.from_documents(doc_list)
-bm25_retriever.k = 2
-
-#Set Search and Key Words
-search_query = "I like computers by Macbooks"
-key_word = "computer"
+bm25_retriever.k = k
 
 #Retrieve Documents
 BM25_results = bm25_retriever.get_relevant_documents(key_word)
@@ -75,22 +74,31 @@ if level == 'INFO':
 embedding = OpenAIEmbeddings()
 
 #Dense Retreiver
-faiss_vector_store = FAISS.from_documents(doc_list, embedding)
+vector_store = FAISS.from_documents(doc_list, embedding)
 
 # Use the faiss_retriever to get documents that match the search query
-FAISS_results =faiss_vector_store.similarity_search_with_score(search_query, k=1)
+SIMILARITY_results =vector_store.similarity_search_with_score(search_query, k=k)
 
 # Print the results
 if level == 'INFO':
-    if FAISS_results:
-        for doc, score in FAISS_results:
+    if SIMILARITY_results:
+        for doc, score in SIMILARITY_results:
             similarity_score = round(1 -score, 2)
-            print(f"Document: {doc}, Similarity Score: {similarity_score}")
+            print(f"Document: {doc}, Similarity Score: {score}")
     else:
         print("No relevant documents found.")
 
+SIMILARITY_relevant_documents = []
+for idx, (doc, score) in enumerate(SIMILARITY_results):
+    similarity_score = round(1 - score, 2)
+    if similarity_score > score_threshold:
+        SIMILARITY_relevant_documents.append((idx,doc.page_content,doc.metadata, score))
 
-# Use the relevant documents as input to the ensemble retriever
-# BM25_results = relevant_documents
-
-# print ("BM25_results", BM25_results)
+# Print the results
+if level == 'INFOZ':
+    for doc in SIMILARITY_relevant_documents:
+        score = doc[3]
+        similarity_score = round(1 - score, 2)
+        print(f"Document: {doc}, Similarity Score: {similarity_score}")
+else:
+    print("No relevant documents found.")
