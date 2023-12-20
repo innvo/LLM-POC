@@ -62,16 +62,14 @@ def get_documents(question):
     conn.close()
 
     # Create docs list for langchain Qa Chain
-     
-    for result in results:   
-       doc =Document(
+    for i, result in enumerate(results):   
+        doc = Document(
             #citation_id=result[0],
-            page_content=result[1] ,
-            metadata={ "content_id": result[0] }    
-       )
-       print("doc.content_id " + str(doc.metadata['content_id']))
-       docs.append(doc)    
-       
+            page_content=result[1],
+            metadata={"content_id": result[0]}
+        )
+        print("doc.content_id " + str(i) + ' ' + str(doc.metadata['content_id']))
+        docs.append(doc)    
     get_response_from_llm(docs)
   
 ## Get response from langchain Qa Chain   
@@ -82,7 +80,8 @@ def get_response_from_llm(docs):
         question=question, 
         input_documents=docs
     ) 
-    print(response, docs[0].metadata['content_id'] )
+    #print(response, docs[0].metadata['content_id'] )
+    print(response)
     
 ## Generate the query embedding 
 def answer_question(question):
@@ -94,9 +93,9 @@ def answer_question(question):
 #question =  "What did the president say about immigration. Provide 5 as bullets.  be concise"   
 #question =  "What did the president Biden say about southern border in in speech February 2023. Provide 3 as bullets. If the user does no provide a timeframe in his question,  ask the user to provide a timeframe to find content"
 #question =  "What did the president biden say about southern border provide as 5 bullets"
-question = "What are the top 5 topics discussed by president biden"
+question = "What are the top 10 topics discussed by president biden. For every sentence in the response cite the content_id"
 #question = "What is the president' birthday"
 
 answer_question(question)
 
-# Quickstart
+
