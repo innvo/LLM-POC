@@ -26,6 +26,7 @@ model = langchain.OpenAI(temperature=0, model_name="gpt-4")
 
 embeddings = OpenAIEmbeddings()
 
+
 ## search emebedding
 def search_embedding(query_string):
     print("in search_embedding")
@@ -61,11 +62,16 @@ def get_documents(question):
     conn.close()
 
     # Create docs list for langchain Qa Chain
+     
     for result in results:   
        doc =Document(
-           page_content=result[1]
+            #citation_id=result[0],
+            page_content=result[1] ,
+            metadata={ "content_id": result[0] }    
        )
-       docs.append(doc)     
+       print("doc.content_id " + str(doc.metadata['content_id']))
+       docs.append(doc)    
+       
     get_response_from_llm(docs)
   
 ## Get response from langchain Qa Chain   
@@ -76,8 +82,8 @@ def get_response_from_llm(docs):
         question=question, 
         input_documents=docs
     ) 
-    print(response)
-
+    print(response, docs[0].metadata['content_id'] )
+    
 ## Generate the query embedding 
 def answer_question(question):
     get_documents(question)
@@ -87,8 +93,8 @@ def answer_question(question):
 #question =  "What did the president say about Justice Breyer" 
 #question =  "What did the president say about immigration. Provide 5 as bullets.  be concise"   
 #question =  "What did the president Biden say about southern border in in speech February 2023. Provide 3 as bullets. If the user does no provide a timeframe in his question,  ask the user to provide a timeframe to find content"
-question =  "What did the president say about southern border"
-#question = "What are the top 5 topics discussed by president biden"
+#question =  "What did the president biden say about southern border provide as 5 bullets"
+question = "What are the top 5 topics discussed by president biden"
 #question = "What is the president' birthday"
 
 answer_question(question)

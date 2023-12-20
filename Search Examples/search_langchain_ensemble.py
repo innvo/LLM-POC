@@ -21,7 +21,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 k=10
 score_threshold = 0.8
 search_query = "I like computers by Macbooks"
-key_word = "computer"
+key_word = "fruit"
 
 # Get the version of langchain
 langchain_version = pkg_resources.get_distribution("langchain").version
@@ -36,6 +36,7 @@ if level == 'INFOX':
 ## Set local environment variables
 OPENAI_API_KEY=os.getenv("OPEN_API_KEY")
 
+# Create Embeddings
 embeddings = OpenAIEmbeddings()
 
 # Create a list of documents metadata
@@ -76,6 +77,8 @@ embedding = OpenAIEmbeddings()
 vector_store = FAISS.from_documents(doc_list, embedding)
 
 # Use the faiss_retriever to get documents that match the search query
+SIMILARITY_retreiver = vector_store.as_retriever(search_kwargs={"k": k})  ## Used for ensemble retriever
+# print("SIMILARITY_retreiver", SIMILARITY_retreiver)
 SIMILARITY_results =vector_store.similarity_search_with_score(search_query, k=k)
 
 # Print the results
@@ -116,5 +119,12 @@ for doc_bm25 in BM25_relevant_documents:
         if x == y:
             print("Match")
             ensemble_result.append((doc_similarity,1-score))
-    
-print("Ensemble Result: ", ensemble_result)
+print("Custom Ensemble Result: ", ensemble_result)    
+
+
+# Create ensemble retriever
+# Does not work as expected, unable to process search query and key_word togther.
+ensemble_retriever = EnsembleRetriever(retrievers=[bm25_retriever,SIMILARITY_retreiver], weights=[0.5,0.5])  
+#docs = ensemble_retriever.get_relevant_documents(key_word, search_query)
+docs = ensemble_retriever.get_relevant_documents(key_word)
+print("Ensemble Retreiver Result: ", docs)
